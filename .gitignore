@@ -1,0 +1,83 @@
+cybersecurity-threat-detection-system/
+├─ README.md
+├─ LICENSE
+├─ .gitignore
+├─ Makefile                         # Skróty: fmt/validate/plan/apply/test/build
+├─ docs/                            # Diagramy, ADR-y, opis architektury
+│  ├─ diagrams/
+│  └─ adr/                          # Architecture Decision Records
+├─ data/                            # Tylko pliki przykładowe/syntetyczne (małe)
+│  ├─ samples/
+│  └─ schema/                       # JSON/CSV schema, data dictionary
+├─ src/
+│  ├─ lambda/
+│  │  ├─ preprocess/                # Lambda: parsing/featureization
+│  │  │  ├─ app.py
+│  │  │  ├─ requirements.txt
+│  │  │  └─ tests/
+│  │  └─ inference-proxy/           # (opcjonalnie) proxy do endpointu SM
+│  ├─ sagemaker/
+│  │  ├─ training/
+│  │  │  ├─ train.py                # XGBoost training entrypoint
+│  │  │  ├─ preprocess.py           # transformacje spójne z inferencją
+│  │  │  └─ utils.py
+│  │  ├─ inference/
+│  │  │  ├─ inference.py            # transform + predict (endpoint script)
+│  │  │  └─ requirements.txt
+│  │  └─ pipeline/
+│  │     └─ pipeline.py             # definicja SageMaker Pipeline (steps)
+│  └─ notebooks/
+│     ├─ 01_explore.ipynb
+│     └─ 02_features_eval.ipynb
+├─ terraform/
+│  ├─ environments/                 # Konfiguracje per środowisko
+│  │  ├─ dev/
+│  │  │  ├─ main.tf                 # wywołania modułów + backend state
+│  │  │  ├─ providers.tf
+│  │  │  ├─ versions.tf
+│  │  │  ├─ variables.tf
+│  │  │  └─ terraform.tfvars        # np. nazwy bucketów, prefiksy
+│  │  └─ prod/
+│  │     ├─ main.tf
+│  │     ├─ providers.tf
+│  │     ├─ versions.tf
+│  │     ├─ variables.tf
+│  │     └─ terraform.tfvars
+│  └─ modules/                      # Reużywalne moduły IaC
+│     ├─ s3-buckets/
+│     │  ├─ main.tf                 # raw, processed, artifacts (wersjonowane)
+│     │  ├─ variables.tf
+│     │  └─ outputs.tf
+│     ├─ lambda-function/
+│     │  ├─ main.tf                 # zip z /src/lambda, role, logi
+│     │  ├─ variables.tf
+│     │  └─ outputs.tf
+│     ├─ sagemaker-training/
+│     │  ├─ main.tf                 # job/pipeline role, ecr image/xgboost algo
+│     │  ├─ variables.tf
+│     │  └─ outputs.tf
+│     ├─ sagemaker-endpoint/
+│     │  ├─ main.tf                 # model, endpoint config, endpoint
+│     │  ├─ variables.tf
+│     │  └─ outputs.tf
+│     ├─ iam/
+│     │  ├─ main.tf                 # role/polityki dla Lambda/SM/S3/CloudWatch
+│     │  └─ variables.tf
+│     └─ monitoring/
+│        ├─ main.tf                 # CW dashboards, alarms, log groups, metrics
+│        └─ variables.tf
+├─ ci/
+│  └─ github-actions/
+│     ├─ terraform.yml              # fmt/validate/plan (PR), apply (tag/release)
+│     ├─ lambda-build.yml           # build & upload artefaktów Lambdy do S3
+│     └─ sagemaker-pipeline.yml     # uruchomienie pipeline’u po mergu do main
+├─ security/
+│  ├─ policies/                     # JSON-y IAM i (opcjonalnie) OPA/Cedar
+│  └─ supply-chain/                 # SBOM/cosign (opcjonalnie)
+├─ observability/
+│  ├─ cw_dashboards/                # definicje JSON CloudWatch
+│  └─ otel/                         # (opcjonalnie) config OTel Collector
+└─ tests/
+   ├─ unit/                         # pytest dla Lambdy i utilsów
+   ├─ integration/                  # testy e2e: event -> prediction
+   └─ load/                         # proste testy obciążeniowe endpointu

@@ -1,0 +1,19 @@
+name: terraform-validate
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/environments/dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+      - run: terraform fmt -check
+      - run: terraform init -backend=false
+      - run: terraform validate
